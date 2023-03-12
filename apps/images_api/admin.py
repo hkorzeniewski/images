@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from apps.images_api.models import UploadedImage, Thumbnail
+from apps.images_api.models import Thumbnail, UploadedImage
 
 # Register your models here.
 

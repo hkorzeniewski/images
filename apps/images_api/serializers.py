@@ -1,8 +1,7 @@
 from rest_framework import mixins, serializers, status, viewsets
 
-from rest_framework import serializers
+from apps.images_api.models import Thumbnail, UploadedImage
 
-from apps.images_api.models import UploadedImage, Thumbnail
 
 class DynamicFieldsModelSerializer(serializers.ModelSerializer):
     """
@@ -12,7 +11,7 @@ class DynamicFieldsModelSerializer(serializers.ModelSerializer):
 
     def __init__(self, *args, **kwargs):
         # Don't pass the 'fields' arg up to the superclass
-        fields = kwargs.pop('fields', None)
+        fields = kwargs.pop("fields", None)
 
         # Instantiate the superclass normally
         super().__init__(*args, **kwargs)
@@ -24,6 +23,7 @@ class DynamicFieldsModelSerializer(serializers.ModelSerializer):
             for field_name in existing - allowed:
                 self.fields.pop(field_name)
 
+
 class DynamicFieldsSerializer(serializers.Serializer):
     """
     A ModelSerializer that takes an additional `fields` argument that
@@ -32,7 +32,7 @@ class DynamicFieldsSerializer(serializers.Serializer):
 
     def __init__(self, *args, **kwargs):
         # Don't pass the 'fields' arg up to the superclass
-        fields = kwargs.pop('fields', None)
+        fields = kwargs.pop("fields", None)
 
         # Instantiate the superclass normally
         super().__init__(*args, **kwargs)
@@ -46,31 +46,28 @@ class DynamicFieldsSerializer(serializers.Serializer):
 
 
 class ThumbnailSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Thumbnail
-        fields = ("thumbnail", )
+        fields = ("thumbnail",)
+
 
 class UploadImageSerializer(serializers.ModelSerializer):
- 
     thumbnails = ThumbnailSerializer(read_only=True, many=True)
 
+    def validate_uploaded_image(self):
+        if self.uploaded_image is None:
+            raise serializers.ValidationError("Upload image")
     class Meta:
         model = UploadedImage
         fields = ("uploaded_image", "uploading_user", "thumbnails")
+
 
 class LinkSerializer(DynamicFieldsSerializer):
     link_to_original_image = serializers.CharField(max_length=256, required=False)
     link_to_200px_thumbnail = serializers.CharField(max_length=256, required=False)
     link_to_400px_thumbnail = serializers.CharField(max_length=256, required=False)
     link_to_default_thumbnail = serializers.CharField(max_length=256, required=False)
+    ability_to_fetch_expiring_link = serializers.BooleanField(required=False)
 
     class Meta:
-        
         fields = "__all__"
-
-    
-
-
-   
-    
